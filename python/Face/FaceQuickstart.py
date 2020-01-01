@@ -12,7 +12,7 @@ from io import BytesIO
 from PIL import Image, ImageDraw
 from azure.cognitiveservices.vision.face import FaceClient
 from msrest.authentication import CognitiveServicesCredentials
-from azure.cognitiveservices.vision.face.models import TrainingStatusType, Person, SnapshotObjectType, OperationStatusType
+from azure.cognitiveservices.vision.face.models import TrainingStatusType, Person, SnapshotObjectType, OperationStatusType, Emotion,FaceAttributeType
 # </snippet_imports>
 
 '''
@@ -86,7 +86,8 @@ SOURCE_ID = os.environ['AZURE_SUBSCRIPTION_ID']
 # Person group name that will get created in this quickstart's Person Group Operations example.
 SOURCE_PERSON_GROUP_ID = PERSON_GROUP_ID
 # Target endpoint. This is your 2nd Face subscription.
-TARGET_ENDPOINT = os.environ['FACE_ENDPOINT2']
+#TARGET_ENDPOINT = os.environ['FACE_ENDPOINT2']
+TARGET_ENDPOINT = os.environ['FACE_ENDPOINT']
 # Target subscription key. Must match the target endpoint region.
 TARGET_KEY = os.environ['FACE_SUBSCRIPTION_KEY2']
 # Target subscription ID. It will be the same as the source ID if created Face resources from the same 
@@ -157,7 +158,9 @@ Print image and draw rectangles around faces
 # Detect a face in an image that contains a single face
 single_face_image_url = 'https://raw.githubusercontent.com/Microsoft/Cognitive-Face-Windows/master/Data/detection1.jpg'
 single_image_name = os.path.basename(single_face_image_url)
-detected_faces = face_client.face.detect_with_url(url=single_face_image_url)
+detected_faces = face_client.face.detect_with_url(url=single_face_image_url,
+                                                  return_face_attributes=[FaceAttributeType.age,FaceAttributeType.gender,FaceAttributeType.emotion])
+emo = face_client.face.detect_with_url()
 if not detected_faces:
 	raise Exception('No face detected from image {}'.format(single_image_name))
 
@@ -170,7 +173,6 @@ def getRectangle(faceDictionary):
     bottom = top + rect.height
     
     return ((left, top), (right, bottom))
-
 
 # Download the image from the url
 response = requests.get(single_face_image_url)
@@ -409,7 +411,7 @@ print('LARGE PERSON GROUP OPERATIONS')
 print()
 
 # Large Person Group ID, should be all lowercase and alphanumeric. For example, 'mygroupname' (dashes are OK).
-LARGE_PERSON_GROUP_ID = 'my-unique-large-person-group'
+LARGE_PERSON_GROUP_ID = 'g1'
 
 # Create empty Large Person Group. Person Group ID must be lower case, alphanumeric, and/or with '-', '_'.
 # The name and the ID can be either the same or different
