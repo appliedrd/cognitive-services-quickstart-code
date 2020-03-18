@@ -49,7 +49,7 @@ References:
     - SDK: https://docs.microsoft.com/en-us/python/api/azure-cognitiveservices-vision-face/azure.cognitiveservices.vision.face?view=azure-python
     - All Face APIs: https://docs.microsoft.com/en-us/azure/cognitive-services/face/APIReference
 '''
-ONLY_EMOTIONS = True
+
 # <snippet_subvars>
 # Set the FACE_SUBSCRIPTION_KEY environment variable with your key as the value.
 # This key will serve all examples in this document.
@@ -122,11 +122,13 @@ print('DETECT FACES')
 print()
 # <snippet_detect>
 # Detect a face in an image that contains a single face
-#single_face_image_url = 'https://www.biography.com/.image/t_share/MTQ1MzAyNzYzOTgxNTE0NTEz/john-f-kennedy---mini-biography.jpg'
-#single_face_image_url = 'https://cdn.pixabay.com/photo/2015/05/04/22/43/human-753172_1280.jpg'
-single_face_image_url = 'https://api.emotiondetect.com/media/2020-02-21T152258.224Z.jpg'
-single_image_name = os.path.basename(single_face_image_url)
-detected_faces = face_client.face.detect_with_url(url=single_face_image_url)
+single_face_image = 'human-753172_1280.jpg'
+#single_image_name = os.path.basename(single_face_image_url)
+# Group image for testing against
+
+image = open(single_face_image, 'rb')
+
+detected_faces = face_client.face.detect_with_stream(single_face_image)
 if not detected_faces:
     raise Exception('No face detected from image {}'.format(single_image_name))
 
@@ -163,9 +165,7 @@ Print image and draw rectangles around faces
 # Detect a face in an image that contains a single face
 #single_face_image_url = 'https://raw.githubusercontent.com/Microsoft/Cognitive-Face-Windows/master/Data/detection1.jpg'
 #single_face_image_url = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Emotions-371238_640.jpg/1200px-Emotions-371238_640.jpg'
-#single_face_image_url = 'https://the-hollywood-gossip-res.cloudinary.com/iu/s--QNCk5CBP--/t_full/cs_srgb,f_auto,fl_strip_profile.lossy,q_auto:420/v1407739219/kim-kardashian-krying.jpg'
-#single_face_image_url = 'https://cdn.pixabay.com/photo/2015/05/04/22/43/human-753172_1280.jpg'
-single_face_image_url = 'https://api.emotiondetect.com/media/2020-03-10T145125.968Z.jpg'
+single_face_image_url = 'https://the-hollywood-gossip-res.cloudinary.com/iu/s--QNCk5CBP--/t_full/cs_srgb,f_auto,fl_strip_profile.lossy,q_auto:420/v1407739219/kim-kardashian-krying.jpg'
 single_image_name = os.path.basename(single_face_image_url)
 detected_faces = face_client.face.detect_with_url(url=single_face_image_url,
                                                   return_face_attributes=
@@ -192,19 +192,18 @@ def getRectangle(faceDictionary):
 
 def getAttributeString(face_atrributes):
     attributes = ["recognized attrubutes"]
-    if not ONLY_EMOTIONS:
-        attributes.append("age: " + str(face_atrributes.age))
-        attributes.append("gender: " + face_atrributes.gender)
-        for key, value in vars(face_atrributes.facial_hair).items():
-            if not isinstance(value, dict):
-                attributes.append(key + ": " + str(value))
-        attributes.append("glasses: " + face_atrributes.glasses)
-        attributes.append("hair: " + str(face_atrributes.hair))
-        attributes.append("head pose: {" + str(face_atrributes.head_pose.pitch) + ", " +
+    attributes.append("age: " + str(face_atrributes.age))
+    attributes.append("gender: " + face_atrributes.gender)
+    for key, value in vars(face_atrributes.facial_hair).items():
+        if not isinstance(value, dict):
+            attributes.append(key + ": " + str(value))
+    attributes.append("glasses: " + face_atrributes.glasses)
+    attributes.append("hair: " + str(face_atrributes.hair))
+    attributes.append("head pose: {" + str(face_atrributes.head_pose.pitch) + ", " +
                       str(face_atrributes.head_pose.roll) + ", " + str(face_atrributes.head_pose.yaw) + "}")
-        for key, value in vars(face_atrributes.makeup).items():
-            if not isinstance(value, dict):
-                attributes.append(key + ": " + str(value))
+    for key, value in vars(face_atrributes.makeup).items():
+        if not isinstance(value, dict):
+            attributes.append(key + ": " + str(value))
     attributes.append("smile: " + str(face_atrributes.smile))
     for key, value in vars(face_atrributes.emotion).items():
         if not isinstance(value, dict):
